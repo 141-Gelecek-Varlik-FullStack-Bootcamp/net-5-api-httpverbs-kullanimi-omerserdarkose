@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Entities;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,40 +9,93 @@ using System.Threading.Tasks;
 
 namespace WebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]s")]
     [ApiController]
     public class CustomerController : ControllerBase
     {
-        // GET: api/<CustomerController>
+        private static List<Customer> customers = new List<Customer>()
+        {
+            new Customer
+            {
+                Id = 1,
+                FirstName ="Cengiz",
+                LastName = "Bozkurt",
+                PhoneNumber="5305555555"
+            },
+            new Customer
+            {
+                Id = 2,
+                FirstName ="Ali",
+                LastName = "Atay",
+                PhoneNumber="5305555555"
+            },
+            new Customer
+            {
+                Id = 3,
+                FirstName ="Serkan",
+                LastName = "Keskin",
+                PhoneNumber="5305555555"
+            }
+        };
+
+
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IEnumerable<Customer> Getcustomers()
         {
-            return new string[] { "value1", "value2" };
+            return customers;
         }
 
-        // GET api/<CustomerController>/5
+
         [HttpGet("{id}")]
-        public string Get(int id)
+        public Customer Get(int id)
         {
-            return "value";
+            var customer = customers.Where(customer => customer.Id == id).SingleOrDefault();
+            return customer;
         }
 
-        // POST api/<CustomerController>
+
         [HttpPost]
-        public void Post([FromBody] string value)
+        public IActionResult AddCustomer([FromBody] Customer newCustomer)
         {
+            var customer = customers.Where(customer => customer.Id == newCustomer.Id).SingleOrDefault();
+
+            if (customer != null)
+            {
+                return BadRequest();
+            }
+            customers.Add(newCustomer);
+            return Ok(customers);
         }
 
-        // PUT api/<CustomerController>/5
+
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public IActionResult UpdateCustomer(int id, [FromBody] Customer updCustomer)
         {
+            var customer = customers.Where(customer => customer.Id == id).SingleOrDefault();
+
+            if (customer == null)
+            {
+                return BadRequest();
+            }
+
+            customer.FirstName = (customer.FirstName != default ? updCustomer.FirstName : customer.FirstName);
+            customer.LastName = (customer.LastName != default ? updCustomer.LastName : customer.LastName);
+            customer.PhoneNumber = (customer.PhoneNumber != default ? updCustomer.PhoneNumber : customer.PhoneNumber);
+            return Ok(customer);
         }
 
-        // DELETE api/<CustomerController>/5
+
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
+            var customer = customers.Where(customer => customer.Id == id).SingleOrDefault();
+
+            if (customer == null)
+            {
+                return BadRequest();
+            }
+            customers.Remove(customer);
+            return Ok();
         }
     }
 }
